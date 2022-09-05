@@ -1,5 +1,7 @@
 package tech.dimitar.gcp.bucketproxy.api.bucket;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +15,21 @@ public class BucketApiImpl implements BucketApi {
     private final Storage storage;
 
     @Override
-    public void readScan(UUID scanId, String imageName) {
+    public byte[] readScan(UUID scanId, String imageName) {
+        byte[] result = new byte[0];
         log.info("READING FROM STORAGE... scan id: " + scanId + ", image name: " + imageName);
+        final Bucket scansBucket = storage.get(bucketName);
+        log.info("File path: " + scanId.toString() + "/scan/" + imageName);
+        Blob scan = scansBucket.get(scanId.toString() + "/scan/" + imageName);
+        if (scan != null) {
+            log.info("Scan file found");
+            byte[] bytes = storage.readAllBytes(scan.getBlobId());
+            log.info("READ: " + bytes.length + " bytes...");
+            result = bytes;
+        } else {
+            log.error("Scan file not found!");
+        }
+
+        return result;
     }
 }
