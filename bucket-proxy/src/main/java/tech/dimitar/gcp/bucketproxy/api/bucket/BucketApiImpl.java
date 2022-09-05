@@ -1,11 +1,16 @@
 package tech.dimitar.gcp.bucketproxy.api.bucket;
 
+import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StreamUtils;
 
+import java.io.InputStream;
+import java.nio.channels.Channels;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -31,5 +36,11 @@ public class BucketApiImpl implements BucketApi {
         }
 
         return result;
+    }
+
+    @Override
+    public InputStream readScanStream(UUID scanId, String imageName) {
+        ReadChannel reader = storage.reader(BlobId.of(bucketName, scanId.toString() + "/scan/" + imageName));
+        return Channels.newInputStream(reader);
     }
 }
