@@ -39,4 +39,14 @@ public class Gcp {
         StreamUtils.copy(imageInputStream, response.getOutputStream());
     }
 
+
+    @GetMapping(value = "/scans/file/{id}/{fileName}", produces = "text/json")
+    public ResponseEntity getFile(@PathVariable String id, @PathVariable(value = "fileName") String fileName, HttpServletResponse response) throws IOException {
+        final byte[] imageBytes = bucketApi.readScan(UUID.fromString(id), fileName);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + fileName ) //+ ".json"
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(imageBytes);
+    }
+
 }
